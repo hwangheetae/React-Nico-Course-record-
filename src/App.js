@@ -1,48 +1,44 @@
 import {useEffect, useState} from "react";
 
 function App(){
-  const [loading, setLoading] =useState(true)
-  const[coins, setCoins] =useState([]);
-  const[cost, setCost] =useState(1);
-  const[need, setNeed]=useState(1);
-  const onChange = (event) =>{
-    setCost(event.target.value);
-    setNeed(1);
-  }
-  const handleInput =(event) =>{
-    setNeed(event.target.value);
-  }
-  useEffect(()=> {
-    fetch("https://api.coinpaprika.com/v1/tickers")
-    .then((response) =>response.json())
-    .then((json)=>{
-      setCoins(json);
-      setLoading(false);
-    });
-  } , []);
-
+  const [loading, setLoading] = useState(true);
+  const [movies,setMovies] = useState([]);
+  const getMovies = async()=> {
+    const json = await (
+      await fetch(
+        'https://yts.mx/api/v2/list_movies.json?minimum_rating=8.8&sort_by=year'
+       )
+    ).json();
+    setMovies(json.data.movies);
+    setLoading();
+    };
+  
+  useEffect(() => {
+    getMovies();
+  }, []);
+  console.log(movies); 
   return (
-  <div>
-    <h1>The Coins! {loading ?"" : `(${coins.length}`}</h1>
-    {loading ? (<strong>Loading...</strong>):(
-    <select onChange ={onChange}>
-      <option>Select coin!</option>
-      {coins.map ((coin, index) => (
-        <option
-          key ={index}
-          value = {coin.quotes.USD.price}
-          id={coin.symbol}
-          symbol={coin.symbol}>
-          {coin.name} ({coin.symbol}) : {coin.quotes.USD.price}
-        </option>
-      ))}
-    </select>)}
-    <h2>Please enter the amount</h2>
-    <div>
-      <input type="number" value={need} onChange={handleInput} placeholder="dollor"/>$
-    </div>
-    <h2>You can get {need/cost}</h2>
-  </div>);
+    <div> 
+      {loading ? (
+        <h1>Loaidng...</h1>
+        ) : (
+          <div>
+            {movies.map((movie) =>(
+              <div key={movie.id}>
+                <img src ={movie.medium_cover_image} />
+                <h2>{movie.title}</h2>
+                <p>{movie.summary}</p>
+                <ul>
+                  {movie.genres.map((g)=> (
+                     <li key ={g}>{g}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+  );
 }
 
 export default App;
